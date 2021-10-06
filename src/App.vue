@@ -25,4 +25,8 @@ export default {
   color: #2c3e50;
 
 }
+
+.label {
+  font-size: 15px !important;
+}
 </style>

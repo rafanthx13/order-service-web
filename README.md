@@ -1,24 +1,16 @@
 # order-service-web
 
-## Project setup
-```
-npm install
-```
+## Cores:
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+Verde do Vue: #41B883
 
-### Compiles and minifies for production
-```
-npm run build
-```
+## Deploy
 
-### Lints and fixes files
-```
-npm run lint
-```
+1. Mande projeto para o git
+2. No Netlify busque por esse repositório
+3. É simples e fácil pelo Netilify
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## TODO
+
++ Verificar valor máximo nos dados do csv
++ Por botao de adicionar exemplos reais
