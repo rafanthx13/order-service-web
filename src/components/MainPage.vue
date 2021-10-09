@@ -3,12 +3,12 @@
 
     <NavBar></NavBar>
 
-    <h2 class="mt-4">Insira todos os dados para predizer se abrirá ou não uma ordem de serviço para os próximos 15 dias</h2>
+    <h2 class="mt-4" >Insira todos os dados para predizer se abrirá ou não uma ordem de serviço para os próximos 15 dias</h2>
 
-    <div class="container mt-4">
+    <!-- <div class="container mt-4">
       <div class="card">
         <div class="card-content">
-          <h3 class="mb-2 subtitle">Exemplos Automaticos</h3>
+          <h3 class="mb-2 subtitle">Exemplos Automáticos</h3>
 
           <div class="columns">
 
@@ -16,7 +16,6 @@
               <b-field>
                 <p class="control">
                   <b-button class="submit-btn" label="Exemplo 1" type="is-primary" @click="person_1()" />
-                  <!-- GRACIELE ANTONIA DA SILVA -->
                 </p>
               </b-field>
             </div>
@@ -25,7 +24,6 @@
               <b-field>
               <p class="control">
                 <b-button class="submit-btn" label="Exemplo 2" type="is-primary" @click="person_2()" />
-                <!-- LUCAS MATEUS SILVA -->
               </p>
               </b-field>
             </div>
@@ -33,7 +31,7 @@
             <div class="column">
               <b-field>
               <p class="control">
-                <b-button class="submit-btn" label="Zerar Tudo" type="is-primary" @click="person_3()" />
+                <b-button class="submit-btn" label="Zerar Tudo" type="is-primary" @click="person_zero()" />
               </p>
               </b-field>
             </div>
@@ -42,7 +40,55 @@
 
         </div>
       </div>
+    </div> -->
+
+     <div class="container mt-4">
+      <div class="card">
+        <div class="card-content">
+
+          <h3 class="mb-2 subtitle">Busca de Clientes da Base Join</h3>
+
+          <div class="columns">
+
+            <div class="column">
+              <b-field>
+                <b-select placeholder="Selecione o Cliente" :loading="personLoading" v-model="selectedClient">
+                  <option v-for="(name, index) in list_names" :key="index" :value="name">
+                    {{ name }}
+                  </option>
+                </b-select>
+              </b-field>
+            </div>
+
+            <div class="column">
+              <b-field>
+              <p class="control">
+                <b-button class="submit-btn" label="Buscar Dados do Cliente" type="is-primary" @click="get_person(selectedClient)" />
+              </p>
+              </b-field>
+            </div>
+
+            <div class="column">
+              <b-field>
+              <p class="control">
+                <b-button class="submit-btn" label="Resetar Dados" type="is-primary" @click="person_zero()" />
+              </p>
+              </b-field>
+            </div>
+
+          </div>
+
+          </div>
+      </div>
     </div>
+
+
+    <!--  <b-field label="Loading">
+            <b-select placeholder="Select a character" loading>
+                <option value="flint">Flint</option>
+                <option value="silver">Silver</option>
+            </b-select>
+        </b-field> -->
 
 
 
@@ -58,7 +104,7 @@
         <div class="column">
 
           <ValidationProvider name="qtd-OS-3" rules="required|between:0,100">
-            <b-field label="Quantidade de OS a 3 meses"
+            <b-field label="Quantidade de OS no antepenúltimo mês"
                 slot-scope="{ errors, valid }"
                 :type="{ 'is-danger': errors[0], 'is-success': valid }"
                 :message="errors"
@@ -71,7 +117,7 @@
         <div class="column">
 
           <ValidationProvider name="qtd-OS-2" rules="required|between:0,100">
-            <b-field label="Quantidade de OS a 2 meses"
+            <b-field label="Quantidade de OS no penúltimo mês"
                 slot-scope="{ errors, valid }"
                 :type="{ 'is-danger': errors[0], 'is-success': valid }"
                 :message="errors"
@@ -495,26 +541,52 @@
       </b-field>
     </div>
 
+    <b-loading is-full-page v-model="fullLoading" :can-cancel="true"></b-loading>
+
     <div class="my-6" v-if="result_prediction">
       <div class="card">
         <div class="content">
+
           <b-message has-icon :type="result_prediction['prediction'] == 0 ? 'is-success' : 'is-danger'" >
-            <div style="display: flex; flex-direction: row; justify-content: center; align-items: center;">
+            <div class="message-style">
               <div class="mr-4">
                 <span>Prediz que </span>
                 <br>
                 <span>{{ result_prediction['message'] }}</span>
-                <br><!--
-                <span>com {{ result_prediction['percent'] }}% de chance</span> -->
+                <br>
+                <!-- <span>com {{ result_prediction['percent'] }}% de chance</span> -->
               </div>
               <div>
                 <img :src="getImgUrl(result_prediction['prediction'])"
                   width="60" height="60" />
               </div>
             </div>
-
-
           </b-message>
+
+
+
+          <div v-if="is_a_person">
+
+            <br/>
+
+            <b-message has-icon :type="right_prediction ? 'is-success' : 'is-danger'" >
+              <div class="message-style ">
+                <div class="mr-4">
+                  <span> {{ right_prediction ? "ACERTOU" : "ERROU" }} PREDIÇÃO</span>
+                  <!-- <br>
+                  <span>{{ result_prediction['message'] }}</span>
+                  <br> -->
+                  <!-- <span>com {{ result_prediction['percent'] }}% de chance</span> -->
+                </div>
+                <div>
+                  <img :src="getImgUrlPrediction(right_prediction)"
+                    width="60" height="60" />
+                </div>
+              </div>
+            </b-message>
+
+          </div>
+
         </div>
       </div>
     </div>
@@ -524,6 +596,8 @@
 
 <script>
 
+import { start_data, list_feat_continous,
+  person_1_data, person_2_data, person_3_data}  from './../assets/raw_data'
 import { required, between, min_value } from 'vee-validate/dist/rules'
 import { extend, ValidationObserver,
   ValidationProvider, setInteractionMode } from 'vee-validate'
@@ -565,52 +639,33 @@ export default {
     return {
        isLoading: false,
        isFullPage: false,
-      "data": {
-        "SR_month_1": "",
-        "SR_month_2": "",
-        "SR_month_3": "",
-        "avg_signal_up_week_4": "",
-        "avg_signal_up_week_3": "",
-        "avg_signal_up_week_2": "",
-        "avg_signal_up_week_1": "",
-        "avg_signal_down_week_4": "",
-        "avg_signal_down_week_3": "",
-        "avg_signal_down_week_2": "",
-        "avg_signal_down_week_1": "",
-        "avg_attenuation_up_week_4": "",
-        "avg_attenuation_up_week_3": "",
-        "avg_attenuation_up_week_2": "",
-        "avg_attenuation_up_week_1": "",
-        "avg_attenuation_down_week_4": "",
-        "avg_attenuation_down_week_3": "",
-        "avg_attenuation_down_week_2": "",
-        "avg_attenuation_down_week_1": "",
-        "std_attainable_rate_up_month_1": "",
-        "std_attainable_rate_up_month_2": "",
-        "std_attainable_rate_up_month_3": "",
-        "std_attainable_rate_down_month_1": "",
-        "std_attainable_rate_down_month_2": "",
-        "std_attainable_rate_down_month_3": "",
-        "std_current_rate_up_month_1": "",
-        "std_current_rate_up_month_2": "",
-        "std_current_rate_up_month_3": "",
-        "std_current_rate_down_month_1": "",
-        "std_current_rate_down_month_2": "",
-        "std_current_rate_down_month_3": "",
-      },
-      "feat_continous": [
-        'SR_month_1', 'SR_month_2', 'SR_month_3', 'avg_signal_up_week_4', 'avg_signal_up_week_3',
-        'avg_signal_up_week_2', 'avg_signal_up_week_1', 'avg_signal_down_week_4', 'avg_signal_down_week_3',
-        'avg_signal_down_week_2', 'avg_signal_down_week_1', 'avg_attenuation_up_week_4', 'avg_attenuation_up_week_3',
-        'avg_attenuation_up_week_2', 'avg_attenuation_up_week_1', 'avg_attenuation_down_week_4', 'avg_attenuation_down_week_3',
-        'avg_attenuation_down_week_2', 'avg_attenuation_down_week_1', 'std_attainable_rate_up_month_1',
-        'std_attainable_rate_up_month_2', 'std_attainable_rate_up_month_3', 'std_attainable_rate_down_month_1',
-        'std_attainable_rate_down_month_2', 'std_attainable_rate_down_month_3', 'std_current_rate_up_month_1',
-        'std_current_rate_up_month_2', 'std_current_rate_up_month_3', 'std_current_rate_down_month_1',
-        'std_current_rate_down_month_2', 'std_current_rate_down_month_3'
-      ],
+       data: start_data,
+       feat_continous: list_feat_continous,
       "result_prediction": false,
+      "person": {},
+      "list_names": [],
+      "personLoading": false,
+      selectedClient: '',
+      backup_person: {},
+      is_a_person: false,
+      right_prediction: false,
+      fullLoading: false,
     }
+  },
+
+  created(){
+    this.personLoading = true
+    http.get('https://service-order-api.herokuapp.com/names').then( (result) => {
+      this.list_names = [...new Set(result['data']['names']) ]
+      // console.log(this.list_names)
+      this.personLoading = false
+    })
+    .catch( (err) => {
+      console.error(err)
+      this.notification_error('Erro na busca de nomes da base Join')
+      this.personLoading = false
+    });
+
   },
 
   methods: {
@@ -625,194 +680,97 @@ export default {
       }
     },
 
-    person_3() {
-      let adict = {
-        "SR_month_3": 0,
-        "SR_month_2": 0,
-        "SR_month_1": 0,
-        "avg_signal_up_week_4": 0,
-        "avg_signal_up_week_3": 0,
-        "avg_signal_up_week_2": 0,
-        "avg_signal_up_week_1": 0,
-        "avg_signal_down_week_4": 0,
-        "avg_signal_down_week_3": 0,
-        "avg_signal_down_week_2": 0,
-        "avg_signal_down_week_1": 0,
-        "avg_attenuation_up_week_4": 0,
-        "avg_attenuation_up_week_3": 0,
-        "avg_attenuation_up_week_2": 0,
-        "avg_attenuation_up_week_1": 0,
-        "avg_attenuation_down_week_4": 0,
-        "avg_attenuation_down_week_3": 0,
-        "avg_attenuation_down_week_2": 0,
-        "avg_attenuation_down_week_1": 0,
-        "std_attainable_rate_up_month_1": 0,
-        "std_attainable_rate_up_month_2": 0,
-        "std_attainable_rate_up_month_3": 0,
-        "std_attainable_rate_down_month_1": 0,
-        "std_attainable_rate_down_month_2": 0,
-        "std_attainable_rate_down_month_3": 0,
-        "std_current_rate_up_month_1": 0,
-        "std_current_rate_up_month_2": 0,
-        "std_current_rate_up_month_3": 0,
-        "std_current_rate_down_month_1": 0,
-        "std_current_rate_down_month_2": 0,
-        "std_current_rate_down_month_3": 0,
-      }
-      for (var el in adict){
-        this.data[el] = adict[el]
-      }
+    getImgUrlPrediction(result){
+      let the_answer_of_prediction = result ? 'right' : 'wrong'
+      let image_chosed = require.context('./../assets/', false, /\.png$/)
+      return image_chosed('./' + the_answer_of_prediction + '.png')
+    },
 
+    // original_od: 0
+    // proba0: 0.3734484439540304
+    // proba1: 0.6265515560459696
+    // result_output: 1
+
+    get_person(person_name){
+      this.fullLoading = true
+      if(person_name != ''){
+        http.get('https://service-order-api.herokuapp.com/person?name=' + person_name).then( (result) => {
+          this.person = result['data']
+          for (let el of this.feat_continous){
+            this.data[el] = this.person[el]
+            this.backup_person[el] = this.person[el]
+          }
+          // console.log(this.person)
+          this.fullLoading = false
+          this.notification_success('Dados do cliente preenchidos com sucesso')
+        })
+        .catch( (err) => {
+          console.error(err)
+          this.notification_error('Erro na busca dos dados do cliente da base Join')
+          this.fullLoading = false
+        });
+      }
     },
 
     person_1(){
-
-      let adict = {
-        // {
-    // "Name": "GRACIELE ANTONIA DA SILVA",
-    // "CPF_CGC": 6160908626,
-    "SR_month_1": 1,
-    "SR_month_2": 2,
-    "SR_month_3": 1,
-    "avg_signal_up_week_4": 0,
-    "avg_signal_up_week_3": 0,
-    "avg_signal_up_week_2": 0,
-    "avg_signal_up_week_1": 0,
-    "avg_signal_down_week_4": 0,
-    "avg_signal_down_week_3": 0,
-    "avg_signal_down_week_2": 0,
-    "avg_signal_down_week_1": 0,
-    "avg_attenuation_up_week_4": 0,
-    "avg_attenuation_up_week_3": 0,
-    "avg_attenuation_up_week_2": 0,
-    "avg_attenuation_up_week_1": 0,
-    "avg_attenuation_down_week_4": 0,
-    "avg_attenuation_down_week_3": 0,
-    "avg_attenuation_down_week_2": 0,
-    "avg_attenuation_down_week_1": 0,
-    "std_attainable_rate_up_month_1": 534766.5590959039,
-    "std_attainable_rate_up_month_2": 0,
-    "std_attainable_rate_up_month_3": 0,
-    "std_attainable_rate_down_month_1": 5264108.316100302,
-    "std_attainable_rate_down_month_2": 0,
-    "std_attainable_rate_down_month_3": 0,
-    "std_current_rate_up_month_1": 467920.7392089158,
-    "std_current_rate_up_month_2": 0,
-    "std_current_rate_up_month_3": 0,
-    "std_current_rate_down_month_1": 2506718.2457620488,
-    "std_current_rate_down_month_2": 0,
-    "std_current_rate_down_month_3": 0,
-    // "count0": 7,
-    // "acertou": "True",
-    // "original_od": 1,
-    // "result_output": 1,
-    // "proba0": 0.10553274909663587,
-    // "proba1": 0.8944672509033639
-  }
-
-
+      let adict = person_1_data
       for (var el in adict){
         this.data[el] = adict[el]
       }
-
     },
 
     person_2(){
-
-      let adict = {
-        "SR_month_3": 0,
-        "SR_month_2": 0,
-        "SR_month_1": 0,
-        "avg_signal_up_week_4": 71,
-        "avg_signal_up_week_3": 8,
-        "avg_signal_up_week_2": 7,
-        "avg_signal_up_week_1": 0,
-        "avg_signal_down_week_4": 225,
-        "avg_signal_down_week_3": 8,
-        "avg_signal_down_week_2": 8,
-        "avg_signal_down_week_1": 0,
-        "avg_attenuation_up_week_4": 103,
-        "avg_attenuation_up_week_3": 3,
-        "avg_attenuation_up_week_2": 3,
-        "avg_attenuation_up_week_1": 0,
-        "avg_attenuation_down_week_4": 159,
-        "avg_attenuation_down_week_3": 8,
-        "avg_attenuation_down_week_2": 8,
-        "avg_attenuation_down_week_1": 0,
-        "std_attainable_rate_up_month_1": "14205632685663800",
-        "std_attainable_rate_up_month_2": "6661581393833340",
-        "std_attainable_rate_up_month_3": "484458460551573",
-        "std_attainable_rate_down_month_1": "21613833070512900",
-        "std_attainable_rate_down_month_2": "2587238489200400",
-        "std_attainable_rate_down_month_3": "2569127543220330",
-        "std_current_rate_up_month_1": "5428812024743530",
-        "std_current_rate_up_month_2": "5661566332149900",
-        "std_current_rate_up_month_3": "57735026918962500",
-        "std_current_rate_down_month_1": "7387968597659300",
-        "std_current_rate_down_month_2": "9572481391990270",
-        "std_current_rate_down_month_3": "9584097940512360",
-      }
-
-      /*
-        "Name": "LUCAS MATEUS SILVA",
-    "CPF_CGC": 9928867674,
-    "SR_month_1": 0,
-    "SR_month_2": 0,
-    "SR_month_3": 0,
-    "avg_signal_up_week_4": 71,
-    "avg_signal_up_week_3": 8,
-    "avg_signal_up_week_2": 7,
-    "avg_signal_up_week_1": 0,
-    "avg_signal_down_week_4": 225,
-    "avg_signal_down_week_3": 8,
-    "avg_signal_down_week_2": 8,
-    "avg_signal_down_week_1": 0,
-    "avg_attenuation_up_week_4": 103,
-    "avg_attenuation_up_week_3": 3,
-    "avg_attenuation_up_week_2": 3,
-    "avg_attenuation_up_week_1": 0,
-    "avg_attenuation_down_week_4": 159,
-    "avg_attenuation_down_week_3": 8,
-    "avg_attenuation_down_week_2": 8,
-    "avg_attenuation_down_week_1": 0,
-    "std_attainable_rate_up_month_1": 14.205632685663812,
-    "std_attainable_rate_up_month_2": 66.61581393833349,
-    "std_attainable_rate_up_month_3": 48.4458460551573,
-    "std_attainable_rate_down_month_1": 2161.3833070512965,
-    "std_attainable_rate_down_month_2": 2587.238489200406,
-    "std_attainable_rate_down_month_3": 2569.127543220331,
-    "std_current_rate_up_month_1": 54.28812024743535,
-    "std_current_rate_up_month_2": 56.61566332149906,
-    "std_current_rate_up_month_3": 57.735026918962575,
-    "std_current_rate_down_month_1": 738.7968597659302,
-    "std_current_rate_down_month_2": 957.2481391990273,
-    "std_current_rate_down_month_3": 958.4097940512364,
-    "count0": 24,
-    "acertou": "True",
-    "original_od": 0,
-    "result_output": 0,
-    "proba0": 0.8101226547669467,
-    "proba1": 0.18987734523305314
-      */
-      /*
-      "OS_Abril": 0,
-    "count0": 24,
-    "acertou": "True",
-    "os_original": 0
-      => Prediz que
-        NÃO VAI ABRIR OS
-        com 79.57% de chance
-      (ACERTOU NOSSO MODELO)
-      */
-
+      let adict = person_2_data
       for (var el in adict){
         this.data[el] = adict[el]
       }
+    },
 
+    person_zero() {
+      let adict = person_3_data
+      for (var el in adict){
+        this.data[el] = adict[el]
+      }
+    },
+
+    notification_error(text_message) {
+      this.$buefy.notification.open({
+          duration: 4000,
+          message: text_message,
+          type: 'is-danger',
+      })
+    },
+
+    notification_success(text_message) {
+      this.$buefy.notification.open({
+          duration: 3000,
+          message: text_message,
+          type: 'is-success',
+      })
+    },
+
+    check_if_change_data(){
+      for (let el of this.feat_continous){
+        if(this.data[el] != this.backup_person[el]){
+          return false
+        }
+      }
+      return true
+    },
+
+    check_prediction(is_person, prediction, real_y){
+      if(is_person){
+        this.is_a_person = true
+        this.right_prediction = prediction == real_y
+      }
     },
 
     submit(){
+      // Verificar se os dados nao foram modificados (copy data e check it one)
+      let check_is_person = this.check_if_change_data()
       this.isLoading = true
+      this.is_a_person = false
+      this.right_prediction = false
 
       this.$refs.observer.validate().then( (validation) => {
         if(validation){
@@ -836,9 +794,11 @@ export default {
                   this.result_prediction['percent'] = (this.result_prediction['porcentage_1'] * 100).toFixed(2)
                   this.result_prediction['color'] = 'red'
                 }
+                this.check_prediction(check_is_person, this.result_prediction['prediction'], this.person['original_od'])
                 this.isLoading = false
               } else {
                 // failed in response
+                this.notification_error('Erro no retorno dos dados da api')
                 this.result_prediction = false
                 this.isLoading = false
               }
@@ -846,13 +806,13 @@ export default {
             .catch((err) => {
               // failed in access api
               console.error(err);
-              console.error('Erro no acesso a API');
+              this.notification_error('Erro no retorno dos dados da async da API')
               this.isLoading = false
             });
 
         } else {
           // failed in form
-          console.error('Erro na validaçao dos dados');
+          this.notification_error('Formulário incompleto')
           this.isLoading = false
         }
 
@@ -863,11 +823,9 @@ export default {
         this.isLoading = false
     });
 
-
-
-
-    }
   },
+
+}
 
 
 };
@@ -894,6 +852,10 @@ export default {
 .subtitle {
   font-size: 15px;
   font-weight: 600;
+}
+
+.message-style {
+  display: flex; flex-direction: row; justify-content: center; align-items: center;
 }
 
 </style>
