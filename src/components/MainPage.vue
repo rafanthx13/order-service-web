@@ -3,7 +3,7 @@
 
     <NavBar></NavBar>
 
-    <h2 class="mt-4" >Insira todos os dados para predizer se abrirá ou não uma ordem de serviço para os próximos 15 dias</h2>
+    <h2 class="mt-4" >Escolha um cliente da base Join ou insira os dados da rede de um cliente para predizer se abrirá ou não uma ordem de serviço nos próximos 15 dias</h2>
 
     <!-- <div class="container mt-4">
       <div class="card">
@@ -52,7 +52,7 @@
 
             <div class="column">
               <b-field>
-                <b-select placeholder="Selecione o Cliente" :loading="personLoading" v-model="selectedClient">
+                <b-select placeholder="Selecione o Cliente" :loading="personLoading" v-model="selectedClient"  >
                   <option v-for="(name, index) in list_names" :key="index" :value="name">
                     {{ name }}
                   </option>
@@ -63,7 +63,7 @@
             <div class="column">
               <b-field>
               <p class="control">
-                <b-button class="submit-btn" label="Buscar Dados do Cliente" type="is-primary" @click="get_person(selectedClient)" />
+                <b-button class="submit-btn" label="Preencher Dados do Cliente" type="is-primary" @click="get_person(selectedClient)" />
               </p>
               </b-field>
             </div>
@@ -81,16 +81,6 @@
           </div>
       </div>
     </div>
-
-
-    <!--  <b-field label="Loading">
-            <b-select placeholder="Select a character" loading>
-                <option value="flint">Flint</option>
-                <option value="silver">Silver</option>
-            </b-select>
-        </b-field> -->
-
-
 
     <ValidationObserver ref="observer">
       <form>
@@ -645,12 +635,19 @@ export default {
       "person": {},
       "list_names": [],
       "personLoading": false,
-      selectedClient: '',
+      selectedClient: null,
       backup_person: {},
       is_a_person: false,
       right_prediction: false,
       fullLoading: false,
     }
+  },
+
+  watch: {
+    selectedClient: function () {
+      this.result_prediction = false
+      this.is_a_person = false
+    },
   },
 
   created(){

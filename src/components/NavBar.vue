@@ -16,7 +16,7 @@
           <b-navbar-item href="#">Contact</b-navbar-item> -->
         <!-- </b-navbar-dropdown> -->
         <span class="my-span">Web Service - Preditor de Ordem de Serviço</span>
-        <!-- <b-navbar-item href="#">Web Service - Preditor de Ordem de Serviço</b-navbar-item> -->
+        <!-- <b-navbar-item href="#">Preditor de Ordem de Serviço de cliente Algar</b-navbar-item> -->
       </template>
       <!-- <template #end>
         <b-navbar-item tag="div">
