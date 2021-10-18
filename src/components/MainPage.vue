@@ -63,7 +63,8 @@
             <div class="column">
               <b-field>
               <p class="control">
-                <b-button class="submit-btn" label="Preencher Dados do Cliente" type="is-primary" @click="get_person(selectedClient)" />
+                <b-button class="submit-btn" label="Buscar Dados do Cliente" :disabled="!selectedClient"
+                v-bind:class="{ disabledBtn: !selectedClient }" type="is-primary" @click="get_person(selectedClient)" />
               </p>
               </b-field>
             </div>
@@ -553,20 +554,12 @@
             </div>
           </b-message>
 
-
-
-          <div v-if="is_a_person">
-
+          <!-- <div v-if="is_a_person">
             <br/>
-
             <b-message has-icon :type="right_prediction ? 'is-success' : 'is-danger'" >
               <div class="message-style ">
                 <div class="mr-4">
                   <span> {{ right_prediction ? "ACERTOU" : "ERROU" }} PREDIÇÃO</span>
-                  <!-- <br>
-                  <span>{{ result_prediction['message'] }}</span>
-                  <br> -->
-                  <!-- <span>com {{ result_prediction['percent'] }}% de chance</span> -->
                 </div>
                 <div>
                   <img :src="getImgUrlPrediction(right_prediction)"
@@ -574,8 +567,7 @@
                 </div>
               </div>
             </b-message>
-
-          </div>
+          </div> -->
 
         </div>
       </div>
@@ -853,6 +845,10 @@ export default {
 
 .message-style {
   display: flex; flex-direction: row; justify-content: center; align-items: center;
+}
+
+.disabledBtn{
+  background-color: #2e4960 !important;
 }
 
 </style>
