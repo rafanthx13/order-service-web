@@ -554,7 +554,7 @@
             </div>
           </b-message>
 
-          <!-- <div v-if="is_a_person">
+          <div v-if="is_a_person">
             <br/>
             <b-message has-icon :type="right_prediction ? 'is-success' : 'is-danger'" >
               <div class="message-style ">
@@ -567,7 +567,7 @@
                 </div>
               </div>
             </b-message>
-          </div> -->
+          </div>
 
         </div>
       </div>
