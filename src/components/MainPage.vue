@@ -785,7 +785,7 @@ export default {
                 }
                 console.log('this.person[original_od]', this.person['original_od'])
                 console.log('this.person[y_real]', this.person['y_real'])
-                this.check_prediction(check_is_person, this.result_prediction['prediction'], this.person['original_od'])
+                this.check_prediction(check_is_person, this.result_prediction['prediction'], this.person['y_real'])
                 this.isLoading = false
               } else {
                 // failed in response
