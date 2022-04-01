@@ -783,6 +783,8 @@ export default {
                   this.result_prediction['percent'] = (this.result_prediction['porcentage_1'] * 100).toFixed(2)
                   this.result_prediction['color'] = 'red'
                 }
+                console.log('this.person[original_od]', this.person['original_od'])
+                console.log('this.person[y_real]', this.person['y_real'])
                 this.check_prediction(check_is_person, this.result_prediction['prediction'], this.person['original_od'])
                 this.isLoading = false
               } else {
